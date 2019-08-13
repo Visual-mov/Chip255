@@ -9,23 +9,25 @@ import processing.sound.*;
  *
  *  Copywrite(c) Ryan Danver 2019
  */
+ 
+// For debugging:
+final boolean ENABLE_STEP = false;
 
 final boolean DRAW_OVERLAY = true;
 final int FRAME_RATE = 60;
-final int CYCLES_PER_FRAME = 8;
+final int CYCLES_PER_FRAME = 10;
 final int SCALE = 15;
 
 int WIDTH = 64;
 int HEIGHT = 32;
 boolean run;
 PFont font;
-
 Chip8 chip8;
 void setup() {
   chip8 = new Chip8(this);
   font = createFont("ubuntu.light.ttf", 10);
   run = false;
-  
+
   selectInput("Please select a rom file.", "loadRom");
   textFont(font);
   background(chip8.fground);
@@ -36,26 +38,35 @@ void setup() {
   chip8.loadFontset();
 }
 void draw() {
-  for (int i = 0; i < CYCLES_PER_FRAME; i++) {
-    if (run) {
-      chip8.exOpcode();
-      if (chip8.draw)
-        chip8.renderPixels();
-      chip8.draw = false;
-      if (DRAW_OVERLAY) drawOverlay();
-    } else break;
+  if(!ENABLE_STEP) {
+    for (int i = 0; i < CYCLES_PER_FRAME; i++) doCycle();
   }
+  if (DRAW_OVERLAY) drawOverlay();
   chip8.updateTimers();
 }
 
-void keyPressed() { chip8.pressed(); }
-void keyReleased() { chip8.released(); }
+void keyPressed() {
+  if(ENABLE_STEP) {
+    if(keyCode == UP) doCycle();
+  }
+  chip8.pressed();
+}
+void keyReleased() { 
+  chip8.released();
+}
 
 void loadRom(File f) {
   chip8.loadFile(f);
   run = true;
 }
-
+void doCycle() {
+  if (run) {
+    chip8.exOpcode();
+    if (chip8.draw)
+      chip8.renderPixels();
+    chip8.draw = false;
+  }
+}
 color backgroundPastel() {
   return color(random(150, 210), random(150, 210), random(150, 210));
 }
@@ -66,47 +77,54 @@ void drawOverlay() {
   color textColor = 0;
   color bStroke = chip8.bground;
   char[] chars;
-  
+
   short var = 0;
-  String[] varNames = {"PC","I","DT","ST","SP"};
-  
-  // Drawing short varibles
+  String[] varNames = {"PC", "I", "DT", "ST", "SP"};
+
+  // Drawing 16-bit varibles
   textSize(15);
-  for(int i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++) {
     fill(textColor);
-    text(varNames[i],width/2 - 30,yloc+10);
-    switch(i) {case 0: var = chip8.PC; break; case 1: var = chip8.index; break;}
-    drawBinaryString(width/2,yloc,binChars(var,12),color(0),bStroke,12);
+    text(varNames[i], width/2 - 30, yloc+10);
+    switch(i) {
+    case 0: var = chip8.PC; break; 
+    case 1: var = chip8.index; break;
+    }
+    drawBinaryString(width/2, yloc, binChars(var, 12), color(0), bStroke, 12);
     yloc+=20;
   }
-  
-  // Drawing byte varibles
+
+  // Drawing 8-bit varibles
   yloc+=20;
-  for(int i = 2; i < 5; i++) {
+  for (int i = 2; i < 5; i++) {
     fill(textColor);
-    text(varNames[i],width/2 - 30,yloc+10);
-    switch(i) {case 2: var = chip8.DTimer; break; case 3: var = chip8.STimer; break; case 4: var = chip8.SP; break;}
-    drawBinaryString(width/2,yloc,binChars(var,8),color(100,255,100),bStroke,8);
+    text(varNames[i], width/2 - 30, yloc+10);
+    switch(i) {
+    case 2: var = chip8.DTimer; break; 
+    case 3: var = chip8.STimer; break; 
+    case 4: var = chip8.SP; break;
+    }
+    drawBinaryString(width/2, yloc, binChars(var, 8), color(100, 255, 100), bStroke, 8);
     yloc+=20;
   }
-  
+
   yloc = sHeight + height/10;
   // Drawing the Registers.
   fill(textColor);
   text("Registers", width/15-30, yloc - 20);
   textSize(11);
   for (int i = 0; i < chip8.V.length; i++) {
-    chars = binChars(chip8.V[i],8);
+    chars = binChars(chip8.V[i], 8);
     fill(textColor);
     text("V[" + i + "]", xloc-30, yloc + 8);
-    drawBinaryString(xloc,yloc,chars, color(255,50,50),bStroke,8);
+    drawBinaryString(xloc, yloc, chars, color(255, 50, 50), bStroke, 8);
     yloc+=20;
     if (i >= chip8.V.length/2) {
       yloc = (i == chip8.V.length/2) ? sHeight + height/10 : yloc;
       xloc = width/5;
     } else xloc = width/15;
   }
-  
+
   // Drawing the Stack.
   yloc = sHeight + height/10;
   fill(textColor);
@@ -114,10 +132,10 @@ void drawOverlay() {
   text("Stack", width/3-20, yloc - 20);
   textSize(11);
   for (int i = chip8.stack.length - 1; i >= 0; i--) {
-    chars = binChars(chip8.stack[i],12);
+    chars = binChars(chip8.stack[i], 12);
     fill(textColor);
     text(i, width/3-20, yloc + 8);
-    drawBinaryString(width/3,yloc,chars, color(50,50,255),bStroke,12);
+    drawBinaryString(width/3, yloc, chars, color(50, 50, 255), bStroke, 12);
     yloc+=10;
   }
 }
