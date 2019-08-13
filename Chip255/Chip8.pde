@@ -56,7 +56,7 @@ class Chip8 {
     bground = backgroundPastel();
     fground = 255;
     osc = new SqrOsc(parent);
-    osc.freq(300);
+    osc.freq(BEEP_FREQ);
   }
   void loadFontset() {
     for (int i = 0; i < 80; i++) {
@@ -93,15 +93,15 @@ class Chip8 {
     }
   }
   void printState() {
-    System.out.printf("OP: 0x%04x\nPC: 0x%04x\nDT: 0x%02x\nST: 0x%02x\n", (mem[PC] << 8 | mem[PC+1]), PC, DTimer, STimer);
+    System.out.printf("OP: %04x\nPC: %04x\nDT: %02x\nST: %02x\nI: %04x\n", (mem[PC] << 8 | mem[PC+1]), PC, DTimer, STimer,index);
     for (int i = 0; i < V.length; i++) {
       System.out.printf("V[%x]: ", i);
-      System.out.printf("0x%02x ", V[i]);
+      System.out.printf("%02x ", V[i]);
     }
-    for(int i =0 ; i < keypad.length; i++) {
-      if(i % 4 == 0) print("\n");
-      print(keypad[i] + " ");
-    }
+    //for(int i =0 ; i < keypad.length; i++) {
+    //  if(i % 4 == 0) print("\n");
+    //  print(keypad[i] + " ");
+    //}
     println("\n");
   }
 
@@ -116,12 +116,13 @@ class Chip8 {
     byte y = (byte) ((op & 0x00F0) >> 4);
     byte kk = (byte) (op & 0x00FF);
     
-    //printState();
+    printState();
     switch(op & 0xF000) {
     default: opError(op); break;
     case 0x0000:
       switch(op) {
       default: opError(op); break;
+      case 0x0000: break;
       
       // 00E0 - Clear Display
       case 0x00E0: 
@@ -139,8 +140,11 @@ class Chip8 {
     
     // 2NNN - Call: NNN
     case 0x2000:
-      stack[SP++] = PC;
-      PC = (short) (nnn - 2);
+      if(SP > 0xF) throwError("Stack overflow.");
+      else {
+        stack[SP++] = PC;
+        PC = (short) (nnn - 2);
+      }
       break;
       
     // 3XNN - Skip next instruction if: Vx = kk.
@@ -218,12 +222,13 @@ class Chip8 {
     // DXYN - Draw Sprite of N length at: (Vx, Vy)
     case 0xD000:
       V[15] = 0;
-      int xloc = 0, yloc = 0;
-      for (int i = index; i < index + (op & 0x000F); i++) {
-        for (int j = 0; j < 8; j++) {
-          byte curBit = (byte) ((mem[i] >> j) & 0x1);
-          xloc = (V[x] + (7 - j)) % WIDTH;
-          yloc = (V[y] + (i - index)) % HEIGHT;
+      short xloc = 0, yloc = 0;
+      //System.out.printf("%04x\n %02x\n %02x\n : %04x\n",index,V[3],V[4],op);
+      for (short i = index; i < index + (op & 0x000F); i++) {
+        for (short j = 0; j < 8; j++) {
+          byte curBit = (byte) ((mem[i] >> j) & 0x01);
+          xloc = (short) ((V[x] + (7 - j)) % WIDTH);
+          yloc = (short) ((V[y] + (i - index)) % HEIGHT);
           if((yloc <= HEIGHT && xloc <= WIDTH) && (yloc >= 0 && xloc >= 0)) {
             if(dmem[xloc][yloc] == 1 && curBit == 1) V[15] = 1;
             dmem[xloc][yloc] ^= curBit;
@@ -251,8 +256,6 @@ class Chip8 {
       
       // FX07 - Assign: Vx = DT
       case 0x0007: V[x] = DTimer; break;
-      
-      // This is line 255! :D
       
       // FX0A - Key: Wait for key press, and store result in Vx
       case 0x000A:
@@ -288,13 +291,13 @@ class Chip8 {
       //  FX55 - Store: Store V0 to Vx in mem starting at I.
       case 0x0055:
         for(short i = 0; i <= x; i++) mem[index + i] = V[i];
-        index = (short) (index + x);
+        index += x;
         break;
         
-      // FX65 - Assign: Store V0 to Vx from memory starting at I.
+      // FX65 - Assign: Read V0 to Vx from memory starting at I.
       case 0x0065:
-        for(short i = 0; i <= x; i++) V[i] = (byte) mem[index + i];
-        index = (short) (index + x);
+        for(byte i = 0; i <= x; i++) V[i] = (byte) mem[index + i];
+        index += x;
         break;
       }
       break;
