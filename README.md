@@ -11,13 +11,8 @@ The CHIP-8 uses a hexidecimal keypad for input. Chip255 maps each key like so:
 A 0 B F  ->  z x c v
 ```
 
-I will note that this interpreter is still in development. So therefor not every CHIP-8 rom will work. However, I have tested some. Here's a list of roms that I have personally tested.
-* Tetris [Fran Dachille, 1991]
-* Tic-Tac-Toe [David Winter]
-* Breakout [Carmelo Cortez, 1979]
-* Pong 2 [David Winter, 1997]
-* Pong [Paul Vervalin, 1990]
-* Coin Flipping [Carmelo Cortez, 1978]
+## Contributing
+This project is no longer actively maintained (it wasn't in the first place). However if you see any improvements that can be done, feel free to contribute any way you see fit.
 
 ## Example images:
 ![Pong](pong.png)
