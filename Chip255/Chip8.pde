@@ -86,7 +86,7 @@ class Chip8 {
     }
   }
   
-  // Console debug functions:
+  // Debug
   void printmem(int min, int max) {
     for (int i = min; i < max; i++) {
       println(hex(i) + " : 0x" + hex(mem[i]));
@@ -98,10 +98,6 @@ class Chip8 {
       System.out.printf("V[%x]: ", i);
       System.out.printf("%02x ", V[i]);
     }
-    //for(int i =0 ; i < keypad.length; i++) {
-    //  if(i % 4 == 0) print("\n");
-    //  print(keypad[i] + " ");
-    //}
     println("\n");
   }
 
