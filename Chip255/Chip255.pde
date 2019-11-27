@@ -1,12 +1,11 @@
 import processing.sound.*;
 
-/* Chip255 v1.0
+/* Chip255 v1.5
  *  Chip255 is an emulator / interpreter for the CHIP-8
  *  programming language. It provides a "panel" of sorts
  *  that allows you to view the current state of the machine.
  *
- *  Go to my website: visual-mov.com
- *
+ *  https://github.com/Visual-mov
  *  Copywrite(c) Ryan Danver 2019
  */
  
@@ -59,6 +58,7 @@ void loadRom(File f) {
   chip8.loadFile(f);
   run = true;
 }
+
 void doCycle() {
   if (run) {
     chip8.exOpcode();
@@ -67,6 +67,7 @@ void doCycle() {
     chip8.draw = false;
   }
 }
+
 color backgroundPastel() {
   return color(random(150, 210), random(150, 210), random(150, 210));
 }
@@ -77,7 +78,6 @@ void drawOverlay() {
   color textColor = 0;
   color bStroke = chip8.bground;
   char[] chars;
-
   short var = 0;
   String[] varNames = {"PC", "I", "DT", "ST", "SP"};
 
