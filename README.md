@@ -1,7 +1,7 @@
 # Chip255
 <img src="image.png" alt="Chip255" width="400"/>
 
-Chip255 is CHIP-8 interpreter/emulator written in the Processing programming language. This interpreter features a debug overlay to view the current state of the machine. This includes registers, the stack, and other variables such as the program counter and timers. For more information on CHIP-8, visit the [Wikipedia link](https://en.wikipedia.org/wiki/CHIP-8)
+Chip255 is CHIP-8 interpreter/emulator written in the Processing programming language. This interpreter features a debug overlay to view the current state of the machine, which includes registers, the stack, and other variables such as the program counter and timers. For more information on CHIP-8, visit the [Wikipedia link](https://en.wikipedia.org/wiki/CHIP-8)
 
 The CHIP-8 uses a hexadecimal keypad for input. Chip255 maps each key like so:
 ```
